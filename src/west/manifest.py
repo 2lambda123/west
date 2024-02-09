@@ -27,6 +27,7 @@ import yaml
 from west import util
 from west.util import PathType
 from west.configuration import Configuration, ConfigFile, MalformedConfig
+from security import safe_command
 
 #
 # Public constants
@@ -933,8 +934,7 @@ class Project:
         cmd_str = util.quote_sh_list(args)
 
         _logger.debug(f"running '{cmd_str}' in {cwd}")
-        popen = subprocess.Popen(
-            args, cwd=cwd,
+        popen = safe_command.run(subprocess.Popen, args, cwd=cwd,
             stdout=subprocess.PIPE if capture_stdout else None,
             stderr=subprocess.PIPE if capture_stderr else None)
 
