@@ -28,6 +28,7 @@ from west.manifest import is_group as is_project_group
 from west.manifest import MANIFEST_REV_BRANCH as MANIFEST_REV
 from west.manifest import QUAL_MANIFEST_REV_BRANCH as QUAL_MANIFEST_REV
 from west.manifest import QUAL_REFS_WEST as QUAL_REFS
+from security import safe_command
 
 #
 # Project-related or multi-repo commands, like "init", "update",
@@ -110,7 +111,7 @@ class _ProjectCommand(WestCommand):
         # manually use Popen in order to try to exit as quickly as
         # possible if 'git status' prints anything.
 
-        popen = subprocess.Popen(['git', 'status', '--porcelain'],
+        popen = safe_command.run(subprocess.Popen, ['git', 'status', '--porcelain'],
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,
                                  cwd=project.abspath)
@@ -1605,7 +1606,7 @@ class ForAll(_ProjectCommand):
                 continue
             self.banner(
                 f'running "{args.subcommand}" in {project.name_and_path}:')
-            rc = subprocess.Popen(args.subcommand, shell=True,
+            rc = safe_command.run(subprocess.Popen, args.subcommand, shell=True,
                                   cwd=project.abspath).wait()
             if rc:
                 failed.append(project)

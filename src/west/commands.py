@@ -27,6 +27,7 @@ import yaml
 from west.configuration import Configuration
 from west.manifest import Manifest, Project
 from west.util import escapes_directory, quote_sh_list, PathType
+from security import safe_command
 
 '''\
 This package provides WestCommand, which is the common abstraction all
@@ -321,7 +322,7 @@ class WestCommand(ABC):
         the call at Verbosity.DBG_MORE level.'''
 
         self._log_subproc(args, **kwargs)
-        return subprocess.run(args, **kwargs)
+        return safe_command.run(subprocess.run, args, **kwargs)
 
     def die_if_no_git(self):
         '''Abort if git is not installed on PATH.
