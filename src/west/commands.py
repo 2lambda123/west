@@ -51,6 +51,17 @@ class CommandError(RuntimeError):
     '''Indicates that a command failed.'''
 
     def __init__(self, returncode=1):
+        """Initialize the function with a return code.
+        Parameters:
+            - returncode (int): The return code to be set for the function.
+        Returns:
+            - None: The function does not return anything.
+        Processing Logic:
+            - Initialize the function with a return code.
+            - Set the return code for the function.
+            - Call the super class' __init__ function.
+            - Assign the return code to the function's returncode attribute."""
+        
         super().__init__()
         self.returncode = returncode
 
@@ -62,10 +73,14 @@ class ExtensionCommandError(CommandError):
     defined and could not be created.'''
 
     def __init__(self, **kwargs):
+        """"""
+        
         self.hint = kwargs.pop('hint', None)
         super(ExtensionCommandError, self).__init__(**kwargs)
 
 def _no_topdir_msg(cwd, name):
+    """"""
+    
     return f'''\
 no west workspace found from "{cwd}"; "west {name}" requires one.
 Things to try:
@@ -265,6 +280,8 @@ class WestCommand(ABC):
         return self._manifest
 
     def _set_manifest(self, manifest: Optional[Manifest]):
+        """"""
+        
         self._manifest = manifest
 
     # Do not use @property decorator syntax to avoid a false positive
@@ -290,11 +307,15 @@ class WestCommand(ABC):
         return self._config
 
     def _set_config(self, config: Optional[Configuration]):
+        """"""
+        
         self._config = config
 
     config = property(_get_config, _set_config)
 
     def _log_subproc(self, args, **kwargs):
+        """"""
+        
         self.dbg(f"running '{quote_sh_list(args)}' in "
                  f"{kwargs.get('cwd') or os.getcwd()}",
                  level=Verbosity.DBG_MORE)
@@ -358,6 +379,16 @@ class WestCommand(ABC):
 
     @staticmethod
     def _parse_git_version(raw_version):
+        """Parse git version output to a tuple.
+        Parameters:
+            - raw_version (str): Output of 'git --version' command.
+        Returns:
+            - tuple: Tuple representing the git version.
+        Processing Logic:
+            - Convert raw version to tuple.
+            - Handle obscure situations.
+            - Match first bit with semver prefix."""
+        
         # Convert the raw 'git --version' output to a tuple.
         #
         # This is a @staticmethod so it can be white box tested.
@@ -515,6 +546,8 @@ class WestCommand(ABC):
     #
 
     def _reset_colors(self, file):
+        """"""
+        
         # The flush=True avoids issues with unrelated output from
         # commands (usually Git) becoming colorized, due to the final
         # attribute reset ANSI escape getting line-buffered
@@ -536,6 +569,8 @@ class _ExtFactory:
     attr: str
 
     def __call__(self):
+        """"""
+        
         # Append the python file's directory to sys.path. This lets
         # its code import helper modules in a natural way.
         py_dir = os.path.dirname(self.py_file)
@@ -585,6 +620,8 @@ class WestExtCommandSpec:
 
 def extension_commands(config: Configuration,
                        manifest: Optional[Manifest] = None):
+    """"""
+    
     # Get descriptions of available extension commands.
     #
     # The return value is an ordered map from project paths to lists of
@@ -613,6 +650,19 @@ def extension_commands(config: Configuration,
     return specs
 
 def _ext_specs(project):
+    """Get a list of WestExtCommandSpec objects for the given west.manifest.Project.
+    Parameters:
+        - project (west.manifest.Project): The project to get the WestExtCommandSpec objects from.
+    Returns:
+        - list: A list of WestExtCommandSpec objects for the given project.
+    Processing Logic:
+        - Get a list of west commands from the project.
+        - Verify that the commands do not escape the project path.
+        - If the project is not cloned or the manifest is copy/pasted, continue to the next command.
+        - Load the spec file and validate it against the schema.
+        - Add the WestExtCommandSpec objects from the spec file to the return list.
+        - Return the list of WestExtCommandSpec objects."""
+    
     # Get a list of WestExtCommandSpec objects for the given
     # west.manifest.Project.
 
@@ -652,6 +702,8 @@ def _ext_specs(project):
     return ret
 
 def _ext_specs_from_desc(project, commands_desc):
+    """"""
+    
     py_file = os.path.join(project.abspath, commands_desc['file'])
 
     # Verify the YAML's python file doesn't escape the project directory.
@@ -674,6 +726,8 @@ def _ext_specs_from_desc(project, commands_desc):
     return thunks
 
 def _commands_module_from_file(file):
+    """"""
+    
     # Python magic for importing a module containing west extension
     # commands. To avoid polluting the sys.modules key space, we put
     # these modules in an (otherwise unpopulated) west.commands.ext
