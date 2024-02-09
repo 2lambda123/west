@@ -131,6 +131,8 @@ ProjectFilterType = List[ProjectFilterElt]
 
 def _update_project_filter(project_filter: ProjectFilterType,
                            option_value: Optional[str]) -> None:
+    """"""
+    
     # Validate a 'manifest.project-filter' configuration option's
     # value. The 'option_value' argument is the raw configuration
     # option. If 'option_value' is invalid, error out. Otherwise,
@@ -201,15 +203,21 @@ _VALID_SCHEMA_VERS = [
 ]
 
 def _is_yml(path: PathType) -> bool:
+    """"""
+    
     return Path(path).suffix in ['.yml', '.yaml']
 
 def _load(data: str) -> Any:
+    """"""
+    
     try:
         return yaml.safe_load(data)
     except yaml.scanner.ScannerError as e:
         raise MalformedManifest(data) from e
 
 def _west_commands_list(west_commands: Optional[WestCommandsType]) -> \
+        """"""
+        
         List[str]:
     # Convert the raw data from a manifest file to a list of
     # west_commands locations. (If it's already a list, make a
@@ -223,6 +231,8 @@ def _west_commands_list(west_commands: Optional[WestCommandsType]) -> \
         return list(west_commands)
 
 def _west_commands_maybe_delist(west_commands: List[str]) -> WestCommandsType:
+    """"""
+    
     # Convert a west_commands list to a string if there's
     # just one element, otherwise return the list itself.
 
@@ -232,6 +242,8 @@ def _west_commands_maybe_delist(west_commands: List[str]) -> WestCommandsType:
         return west_commands
 
 def _west_commands_merge(wc1: List[str], wc2: List[str]) -> List[str]:
+    """"""
+    
     # Merge two west_commands lists, filtering out duplicates.
 
     if wc1 and wc2:
@@ -242,10 +254,14 @@ def _west_commands_merge(wc1: List[str], wc2: List[str]) -> List[str]:
 # Manifest import handling
 
 def _default_importer(project: 'Project', file: str) -> NoReturn:
+    """"""
+    
     raise ManifestImportFailed(project, file)
 
 def _manifest_content_at(project: 'Project', path: PathType,
                          rev: str = QUAL_MANIFEST_REV_BRANCH) \
+                                """"""
+                                
                                 -> ImportedContentType:
     # Get a list of manifest data from project at path
     #
@@ -301,6 +317,8 @@ class _import_map(NamedTuple):
     path_prefix: str
 
 def _is_imap_list(value: Any) -> bool:
+    """"""
+    
     # Return True if the value is a valid import map 'blocklist' or
     # 'allowlist'. Empty strings and lists are OK, and list nothing.
 
@@ -309,6 +327,8 @@ def _is_imap_list(value: Any) -> bool:
              all(isinstance(item, str) for item in value)))
 
 def _imap_filter(imap: _import_map) -> ImapFilterFnType:
+    """"""
+    
     # Returns either None (if no filter is necessary) or a
     # filter function for the given import map.
 
@@ -323,10 +343,28 @@ def _ensure_list(item: Union[str, List[str]]) -> List[str]:
     # returns item.
 
     if isinstance(item, str):
+        """"""
+        
         return [item]
     return item
 
 def _is_imap_ok(imap: _import_map, project: 'Project') -> bool:
+    """Returns:
+        - bool: True if project passes import map's filters, False otherwise.
+    Parameters:
+        - imap (_import_map): Import map to check against.
+        - project ('Project'): Project to check.
+    Processing Logic:
+        - Check if project is blocked by name or path.
+        - Check if project is allowed by name or path.
+        - Check if there are no allowlists.
+        - Return True if project is allowed or if there are no allowlists and False otherwise.
+    Example:
+        >>> imap = _import_map(name_allowlist=['test'], path_allowlist=['/path/to/test'])
+        >>> project = Project(name='test', path='/path/to/test/test.py')
+        >>> _is_imap_ok(imap, project)
+        True"""
+    
     # Return True if a project passes an import map's filters,
     # and False otherwise.
 
@@ -419,12 +457,16 @@ class _import_ctx(NamedTuple):
 
 def _imap_filter_allows(imap_filter: ImapFilterFnType,
                         project: 'Project') -> bool:
+    """"""
+    
     # imap_filter(project) if imap_filter is not None; True otherwise.
 
     return (imap_filter is None) or imap_filter(project)
 
 def _compose_imap_filters(imap_filter1: ImapFilterFnType,
                           imap_filter2: ImapFilterFnType) -> ImapFilterFnType:
+    """"""
+    
     # Return an import map filter which gives back the logical AND of
     # what the two argument filter functions would return.
 
@@ -449,6 +491,17 @@ _RESERVED_PROJECT_NAME_RE = re.compile(r'[\s,]')
 
 def _update_disabled_groups(disabled_groups: Set[str],
                             group_filter: GroupFilterType):
+    """Update a set of disabled groups in place based on 'group_filter'.
+    Parameters:
+        - disabled_groups (Set[str]): A set of disabled groups.
+        - group_filter (GroupFilterType): A group filter to update the disabled groups.
+    Returns:
+        - None: This function updates the disabled groups in place.
+    Processing Logic:
+        - Add disabled group if starts with '-'.
+        - Remove group if starts with '+' and is in disabled groups.
+        - Assert False if group filter item is unexpected."""
+    
     # Update a set of disabled groups in place based on
     # 'group_filter'.
 
@@ -473,6 +526,8 @@ def _is_submodule_dict_ok(subm: Any) -> bool:
     # submodule fields of proper types.
 
     class _failed(Exception):
+        """"""
+        
         pass
 
     def _assert(cond):
@@ -646,11 +701,15 @@ class ManifestImportFailed(Exception):
     '''
 
     def __init__(self, project: Optional['Project'], imp: Any):
+        """"""
+        
         super().__init__()
         self.project = project
         self.imp = imp
 
     def __str__(self):
+        """"""
+        
         if self.project is None:
             # This happens when imports fail in the manifest repository
             return (f'cannot import {self.imp}; is it present '
@@ -667,6 +726,16 @@ class ManifestVersionError(Exception):
     '''
 
     def __init__(self, version: str, file: Optional[PathType] = None):
+        """"Initializes the required version of west and the file that required it, if any."
+        Parameters:
+            - version (str): The minimum version of west that is required.
+            - file (Optional[PathType]): The file that required this version of west, if any.
+        Returns:
+            - None: This function does not return any value.
+        Processing Logic:
+            - Initializes the version of west.
+            - Initializes the file that required this version of west, if any."""
+        
         super().__init__(version, file)
         self.version = version
         '''The minimum version of west that was required.'''
@@ -717,6 +786,8 @@ class ImportFlag(enum.IntFlag):
     IGNORE_PROJECTS = 4
 
 def _flags_ok(flags: ImportFlag) -> bool:
+    """"""
+    
     # Sanity-check the combination of flags.
     F_I = ImportFlag.IGNORE
     F_FP = ImportFlag.FORCE_PROJECTS
